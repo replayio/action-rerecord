@@ -20,10 +20,10 @@ runs:
       with:
         result-encoding: json
         script: |
-          const fs = require("fs");
-          const path = require("path");
-
-          const apiKey = '${{ inputs.api-key || process.env.REPLAY_API_KEY || process.env.RECORD_REPLAY_API_KEY || null }}';
+          let apiKey = '${{ inputs.api-key }}';
+          if (!apiKey) {
+            apiKey = process.env.REPLAY_API_KEY || process.env.RECORD_REPLAY_API_KEY || null;
+          }
           if (!apiKey) {
             throw new Error("You must provide an API key for rerecording. This can be added as an environment variable named REPLAY_API_KEY or as an `api-key` input.");
           }
