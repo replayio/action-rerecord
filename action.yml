@@ -34,9 +34,32 @@ runs:
             fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf8")
           );
           const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-          const issue_number = eventPayload.pull_request.number;
+          const pr_number = eventPayload.pull_request.number;
+          console.log("PullRequestData", owner, repo, pr_number);
 
-          console.log("PullRequestData", owner, repo, issue_number);
+          // Get the linked issues using the search API
+          const linkedIssueData = await github.rest.search.issuesAndPullRequests({
+            q: `repo:${owner}/${repo} is:issue linked:pr-${pr_number}`
+          });
+
+          const linkedIssues = linkedIssueData.data.items.map(issue => issue.number);
+          console.log(`Found linked issues: ${JSON.stringify(linkedIssues)}`);
+
+          if (!linkedIssues.length) {
+            throw new Error("No linked issues found");
+          }
+          if (linkedIssues.length > 1) {
+            throw new Error("More than one linked issue found");
+          }
+
+          const issue_number = linkedIssues[0];
+          const issue = await github.rest.issues.get({
+            owner,
+            repo,
+            issue_number,
+          });
+
+          console.log("LinkedIssue", issue_number, issue.data.title, issue.data.body);
 
           const gap = process.env.GITHUB_ACTION_PATH;
           const rerecordIssue = require(gap + '/dist/rerecord.js');
