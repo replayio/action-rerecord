@@ -1,0 +1,40 @@
+name: Rerecord Issue
+author: Replay.io
+description: Rerecords an issue with updated sources and comments with the results
+inputs:
+  api-key:
+    description: "Replay.io API Key"
+  public:
+    description: "Makes the rerecorded replay viewable by everyone"
+    default: false
+  include-summary:
+    description: "Display links to the rerecorded replay on the workflow summary page"
+    default: true
+
+runs:
+  using: composite
+  steps:
+    - name: "Rerecord Issue"
+      id: "rerecord-issue"
+      uses: actions/github-script@v7
+      with:
+        result-encoding: json
+        script: |
+          const fs = require("fs");
+          const path = require("path");
+
+          const apiKey = '${{ inputs.api-key || process.env.REPLAY_API_KEY || process.env.RECORD_REPLAY_API_KEY || null }}';
+          if (!apiKey) {
+            throw new Error("You must provide an API key for rerecording. This can be added as an environment variable named REPLAY_API_KEY or as an `api-key` input.");
+          }
+
+          const gap = process.env.GITHUB_ACTION_PATH;
+          const rerecordIssue = require(gap + '/dist/rerecord.js');
+
+          await rerecordIssue({
+            apiKey,
+            public: ${{ inputs.public || false }},
+            includeSummary: ${{ inputs.include-summary }},
+          });
+      env:
+        RECORD_REPLAY_API_KEY: ${{ inputs.api-key }}
