@@ -14,12 +14,17 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Install dependencies
+      run: npm install @octokit/rest
     - name: "Rerecord Issue"
       id: "rerecord-issue"
       uses: actions/github-script@v7
       with:
         result-encoding: json
         script: |
+          const fs = require("fs");
+          const Octokit = require("@octokit/rest");
+
           let apiKey = '${{ inputs.api-key }}';
           if (!apiKey) {
             apiKey = process.env.REPLAY_API_KEY || process.env.RECORD_REPLAY_API_KEY || null;
@@ -28,13 +33,30 @@ runs:
             throw new Error("You must provide an API key for rerecording. This can be added as an environment variable named REPLAY_API_KEY or as an `api-key` input.");
           }
 
+          const eventPayload = JSON.parse(
+            fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf8")
+          );
+          const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+          const issue_number = eventPayload.pull_request.number;
+
+          console.log("PullRequestData", owner, repo, issue_number);
+
           const gap = process.env.GITHUB_ACTION_PATH;
           const rerecordIssue = require(gap + '/dist/rerecord.js');
 
-          await rerecordIssue({
+          const data = await rerecordIssue({
             apiKey,
             public: ${{ inputs.public || false }},
             includeSummary: ${{ inputs.include-summary }},
           });
+
+          const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+          await octokit.issues.createComment({
+            owner,
+            repo,
+            issue_number,
+            body: data,
+          });
       env:
-        RECORD_REPLAY_API_KEY: ${{ inputs.api-key }}
+        REPLAY_API_KEY: ${{ inputs.api-key }}
