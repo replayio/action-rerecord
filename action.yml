@@ -37,14 +37,28 @@ runs:
           const pr_number = eventPayload.pull_request.number;
           console.log("PullRequestData", owner, repo, pr_number);
 
-          const { data: connectedItems } = await github.rest.issues.listConnectedItems({
+          // Get linked issues using GraphQL
+          const query = `
+            query($owner: String!, $repo: String!, $pr_number: Int!) {
+              repository(owner: $owner, name: $repo) {
+                pullRequest(number: $pr_number) {
+                  closingIssuesReferences(first: 10) {
+                    nodes {
+                      number
+                    }
+                  }
+                }
+              }
+            }
+          `;
+
+          const linkedIssuesResult = await github.graphql(query, {
             owner,
             repo,
-            issue_number: pr_number,
-            item_type: 'ISSUE'
+            pr_number
           });
 
-          const linkedIssues = connectedItems.items.map(item => item.issue.number);
+          const linkedIssues = linkedIssuesResult.repository.pullRequest.closingIssuesReferences.nodes.map(node => node.number);
           console.log(`Found linked issues: ${JSON.stringify(linkedIssues)}`);
 
           if (!linkedIssues.length) {
