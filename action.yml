@@ -19,12 +19,13 @@ runs:
       shell: bash
     - name: "Rerecord Issue"
       id: "rerecord-issue"
-      uses: actions/github-script@v7
+      uses: actions/github-script@v6
       with:
         result-encoding: json
         script: |
-          import fs from "fs";
-          import { Octokit } from "@octokit/rest";
+        await (async () => {
+          const fs = require("fs");
+          const Octokit = await import("@octokit/rest");
 
           let apiKey = '${{ inputs.api-key }}';
           if (!apiKey) {
@@ -59,5 +60,6 @@ runs:
             issue_number,
             body: data,
           });
+        })();
       env:
         REPLAY_API_KEY: ${{ inputs.api-key }}
