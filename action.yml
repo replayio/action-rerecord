@@ -23,8 +23,8 @@ runs:
       with:
         result-encoding: json
         script: |
-          const fs = require("fs");
-          const Octokit = require("@octokit/rest");
+          import fs from "fs";
+          import { Octokit } from "@octokit/rest";
 
           let apiKey = '${{ inputs.api-key }}';
           if (!apiKey) {
