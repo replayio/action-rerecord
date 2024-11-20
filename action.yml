@@ -37,12 +37,14 @@ runs:
           const pr_number = eventPayload.pull_request.number;
           console.log("PullRequestData", owner, repo, pr_number);
 
-          // Get the linked issues using the search API
-          const linkedIssueData = await github.rest.search.issuesAndPullRequests({
-            q: `repo:${owner}/${repo} is:issue linked:pr-${pr_number}`
+          const { data: connectedItems } = await github.rest.issues.listConnectedItems({
+            owner,
+            repo,
+            issue_number: pr_number,
+            item_type: 'ISSUE'
           });
 
-          const linkedIssues = linkedIssueData.data.items.map(issue => issue.number);
+          const linkedIssues = connectedItems.items.map(item => item.issue.number);
           console.log(`Found linked issues: ${JSON.stringify(linkedIssues)}`);
 
           if (!linkedIssues.length) {
