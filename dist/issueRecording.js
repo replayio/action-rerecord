@@ -48,7 +48,7 @@ async function getIssueRecording(options) {
   const issue = await github.rest.issues.get({
     owner,
     repo,
-    issueNumber
+    issue_number: issueNumber
   });
   console.log("LinkedIssueContents", issueNumber, issue.data.title, issue.data.body);
   const recordingId = scanRecordingId(issue.data.body);
