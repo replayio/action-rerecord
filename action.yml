@@ -47,7 +47,7 @@ runs:
           await github.rest.issues.createComment({
             owner,
             repo,
-            issueNumber,
+            issue_number: issueNumber,
             body: data,
           });
       env:
