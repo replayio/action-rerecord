@@ -32,7 +32,7 @@ runs:
           const gap = process.env.GITHUB_ACTION_PATH;
 
           const getIssueRecording = require(gap + '/dist/issueRecording.js');
-          const { issueNumber, recordingId } = await getIssueRecording({
+          const { owner, repo, issueNumber, recordingId } = await getIssueRecording({
             github,
             eventPath: process.env.GITHUB_EVENT_PATH,
             repositoryName: process.env.GITHUB_REPOSITORY,
@@ -41,15 +41,15 @@ runs:
           const rerecordIssue = require(gap + '/dist/rerecord.js');
           const data = await rerecordIssue({
             apiKey,
-            serverURL: ${{ inputs.server-url }},
-            public: ${{ inputs.public }},
+            serverURL: '${{ inputs.server-url }}',
+            public: '${{ inputs.public }}' === 'true',
             recordingId,
           });
 
           await github.rest.issues.createComment({
             owner,
             repo,
-            issue_number,
+            issueNumber,
             body: data,
           });
       env:
