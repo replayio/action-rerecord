@@ -4,12 +4,11 @@ description: Rerecords an issue with updated sources and comments with the resul
 inputs:
   api-key:
     description: "Replay.io API Key"
+  server-url:
+    description: "Server with new sources to use while rerecording"
   public:
     description: "Makes the rerecorded replay viewable by everyone"
     default: false
-  include-summary:
-    description: "Display links to the rerecorded replay on the workflow summary page"
-    default: true
 
 runs:
   using: composite
@@ -30,60 +29,21 @@ runs:
             throw new Error("You must provide an API key for rerecording. This can be added as an environment variable named REPLAY_API_KEY or as an `api-key` input.");
           }
 
-          const eventPayload = JSON.parse(
-            fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf8")
-          );
-          const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-          const pr_number = eventPayload.pull_request.number;
-          console.log("PullRequestData", owner, repo, pr_number);
-
-          // Get linked issues using GraphQL
-          const query = `
-            query($owner: String!, $repo: String!, $pr_number: Int!) {
-              repository(owner: $owner, name: $repo) {
-                pullRequest(number: $pr_number) {
-                  closingIssuesReferences(first: 10) {
-                    nodes {
-                      number
-                    }
-                  }
-                }
-              }
-            }
-          `;
-
-          const linkedIssuesResult = await github.graphql(query, {
-            owner,
-            repo,
-            pr_number
-          });
-
-          const linkedIssues = linkedIssuesResult.repository.pullRequest.closingIssuesReferences.nodes.map(node => node.number);
-          console.log(`Found linked issues: ${JSON.stringify(linkedIssues)}`);
-
-          if (!linkedIssues.length) {
-            throw new Error("No linked issues found");
-          }
-          if (linkedIssues.length > 1) {
-            throw new Error("More than one linked issue found");
-          }
-
-          const issue_number = linkedIssues[0];
-          const issue = await github.rest.issues.get({
-            owner,
-            repo,
-            issue_number,
-          });
-
-          console.log("LinkedIssue", issue_number, issue.data.title, issue.data.body);
-
           const gap = process.env.GITHUB_ACTION_PATH;
-          const rerecordIssue = require(gap + '/dist/rerecord.js');
 
+          const getIssueRecording = require(gap + '/dist/issueRecording.js');
+          const { issueNumber, recordingId } = await getIssueRecording({
+            github,
+            eventPath: process.env.GITHUB_EVENT_PATH,
+            repositoryName: process.env.GITHUB_REPOSITORY,
+          });
+
+          const rerecordIssue = require(gap + '/dist/rerecord.js');
           const data = await rerecordIssue({
             apiKey,
-            public: ${{ inputs.public || false }},
-            includeSummary: ${{ inputs.include-summary }},
+            serverURL: ${{ inputs.server-url }},
+            public: ${{ inputs.public }},
+            recordingId,
           });
 
           await github.rest.issues.createComment({
