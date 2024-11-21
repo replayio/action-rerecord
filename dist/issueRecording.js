@@ -51,6 +51,6 @@ async function getIssueRecording(options) {
   });
   console.log("LinkedIssueContents", issueNumber, issue.data.title, issue.data.body);
   const recordingId = scanRecordingId(issue.data.body);
-  return { issueNumber, recordingId };
+  return { owner, repo, issueNumber, recordingId };
 }
 module.exports = getIssueRecording;
