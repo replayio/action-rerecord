@@ -1,4 +1,5 @@
 // issueRecording.js
+var fs = require("fs");
 function scanRecordingId(body) {
   const match = body.match(/https:\/\/app.replay\.io\/recording\/([a-zA-Z0-9\-]+)/);
   if (!match) {
