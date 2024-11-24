@@ -1,6 +1,54 @@
 // rerecord.js
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message ?? "Assertion failed");
+  }
+}
 async function rerecordIssue(options) {
-  console.log("rerecordIssue", JSON.stringify(options));
-  return "Hello World from the rerecord action";
+  const {
+    client,
+    apiKey,
+    serverURL,
+    recordingId
+  } = options;
+  const sessionRv = await client.sendCommand({
+    method: "Recording.createSession",
+    params: { recordingId }
+  });
+  const { sessionId } = sessionRv;
+  assert(sessionId);
+  const rv = await client.sendCommand({
+    method: "Session.experimentalCommand",
+    params: {
+      name: "rerecordCompare",
+      params: {
+        rerecordServerURL: serverURL,
+        apiKey
+      }
+    },
+    sessionId
+  });
+  console.log("rerecordCompare finished", JSON.stringify(rv));
+  const {
+    result,
+    rerecordedRecordingId,
+    originalScreenshotURL,
+    rerecordedScreenshotURL
+  } = rv.result;
+  assert(result === "Success");
+  assert(rerecordedRecordingId);
+  assert(originalScreenshotURL);
+  assert(rerecordedScreenshotURL);
+  return `
+Rerecording: https://app.replay.io/recording/${rerecordedRecordingId}
+
+Original screenshot:
+
+![original](${originalScreenshotURL})
+
+Rerecorded screenshot:
+
+![rerecorded](${rerecordedScreenshotURL})
+`;
 }
 module.exports = rerecordIssue;

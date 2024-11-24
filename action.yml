@@ -6,13 +6,12 @@ inputs:
     description: "Replay.io API Key"
   server-url:
     description: "Server with new sources to use while rerecording"
-  public:
-    description: "Makes the rerecorded replay viewable by everyone"
-    default: false
 
 runs:
   using: composite
   steps:
+    - name: Install dependencies
+      run: npm install
     - name: "Rerecord Issue"
       id: "rerecord-issue"
       uses: actions/github-script@v7
@@ -36,11 +35,14 @@ runs:
             repositoryName: process.env.GITHUB_REPOSITORY,
           });
 
+          const ProtocolClient = require(gap + '/dist/protocolClient.js');
+          const client = new ProtocolClient();
+
           const rerecordIssue = require(gap + '/dist/rerecord.js');
           const data = await rerecordIssue({
+            client,
             apiKey,
             serverURL: '${{ inputs.server-url }}',
-            public: '${{ inputs.public }}' === 'true',
             recordingId,
           });
 
