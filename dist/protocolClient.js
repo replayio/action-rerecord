@@ -2435,7 +2435,6 @@ var ProtocolClient = class {
   socket;
   constructor() {
     logDebug(`Creating WebSocket for ${replayWsServer}`);
-    this.accessToken = accessToken;
     this.socket = new WebSocket(replayWsServer);
     this.socket.on("close", this.onSocketClose);
     this.socket.on("error", this.onSocketError);
