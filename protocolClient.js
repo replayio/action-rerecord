@@ -36,6 +36,7 @@ function createDeferred() {
 }
 
 class ProtocolClient {
+  openDeferred = createDeferred();
   eventListeners = new Map();
   nextMessageId = 1;
   pendingCommands = new Map();
@@ -54,6 +55,10 @@ class ProtocolClient {
     this.listenForMessage("Recording.sessionError", error => {
       logDebug(`Session error ${error}`);
     });
+  }
+
+  initialize() {
+    return this.openDeferred.promise;
   }
 
   close() {
@@ -137,6 +142,7 @@ class ProtocolClient {
 
   onSocketOpen = async () => {
     logDebug("Socket opened");
+    this.openDeferred.resolve();
   };
 }
 

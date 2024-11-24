@@ -12,6 +12,7 @@ async function rerecordIssue(options) {
     recordingId,
   } = options;
 
+  await client.initialize();
   const sessionRv = await client.sendCommand({
     method: "Recording.createSession",
     params: { recordingId }
