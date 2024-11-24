@@ -11,6 +11,7 @@ async function rerecordIssue(options) {
     serverURL,
     recordingId
   } = options;
+  await client.initialize();
   const sessionRv = await client.sendCommand({
     method: "Recording.createSession",
     params: { recordingId }

@@ -2429,6 +2429,7 @@ function createDeferred() {
   return { promise, resolve, reject };
 }
 var ProtocolClient = class {
+  openDeferred = createDeferred();
   eventListeners = /* @__PURE__ */ new Map();
   nextMessageId = 1;
   pendingCommands = /* @__PURE__ */ new Map();
@@ -2443,6 +2444,9 @@ var ProtocolClient = class {
     this.listenForMessage("Recording.sessionError", (error) => {
       logDebug(`Session error ${error}`);
     });
+  }
+  initialize() {
+    return this.openDeferred.promise;
   }
   close() {
     this.socket.close();
@@ -2511,6 +2515,7 @@ var ProtocolClient = class {
   };
   onSocketOpen = async () => {
     logDebug("Socket opened");
+    this.openDeferred.resolve();
   };
 };
 module.exports = ProtocolClient;
