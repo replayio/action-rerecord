@@ -21,7 +21,8 @@ async function getIssueRecording(options) {
   );
   const [owner, repo] = repositoryName.split("/");
   const prNumber = eventPayload.pull_request.number;
-  console.log("PullRequestData", owner, repo, prNumber);
+  const prRevision = eventPayload.pull_request.head.sha;
+  console.log("PullRequestData", owner, repo, prNumber, prRevision);
 
   // Get linked issues using GraphQL
   const query = `
@@ -64,7 +65,7 @@ async function getIssueRecording(options) {
   console.log("LinkedIssueContents", issueNumber, issue.data.title, issue.data.body);
 
   const recordingId = scanRecordingId(issue.data.body);
-  return { owner, repo, prNumber, issueNumber, recordingId };
+  return { owner, repo, prNumber, prRevision, issueNumber, recordingId };
 }
 
 module.exports = getIssueRecording;
