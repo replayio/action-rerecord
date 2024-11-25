@@ -35,7 +35,7 @@ async function rerecordIssue(options) {
     rerecordedRecordingId,
     originalScreenshotURL,
     rerecordedScreenshotURL
-  } = rv.result;
+  } = rv.rval;
   assert(result === "Success");
   assert(rerecordedRecordingId);
   assert(originalScreenshotURL);
