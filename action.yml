@@ -51,5 +51,6 @@ runs:
             issue_number: prNumber,
             body: data,
           });
+          process.exit(0);
       env:
         REPLAY_API_KEY: ${{ inputs.api-key }}
