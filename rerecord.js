@@ -49,13 +49,16 @@ async function rerecordIssue(options) {
   return `
 Rerecording for ${revision}: https://app.replay.io/recording/${rerecordedRecordingId}
 
-Original screenshot:
-
-![original](${originalScreenshotURL})
-
-Rerecorded screenshot:
-
-![rerecorded](${rerecordedScreenshotURL})
+<table>
+  <tr>
+    <td>Before</td>
+     <td>After</td>
+  </tr>
+  <tr>
+    <td><img alt="Before" src="${originalScreenshotURL}"></td>
+    <td><img alt="After" src="${rerecordedScreenshotURL}"></td>
+  </tr>
+</table>
 `;
 }
 
