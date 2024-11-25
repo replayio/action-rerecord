@@ -42,7 +42,7 @@ runs:
             apiKey,
             serverURL: '${{ inputs.server-url }}',
             recordingId,
-            revision: process.env.GITHUB_REF.substring(0, 12),
+            revision: github.event.pull_request.head.sha.substring(0, 12),
           });
 
           await github.rest.issues.createComment({
