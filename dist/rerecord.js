@@ -9,7 +9,8 @@ async function rerecordIssue(options) {
     client,
     apiKey,
     serverURL,
-    recordingId
+    recordingId,
+    revision
   } = options;
   await client.initialize();
   const sessionRv = await client.sendCommand({
@@ -41,7 +42,7 @@ async function rerecordIssue(options) {
   assert(originalScreenshotURL);
   assert(rerecordedScreenshotURL);
   return `
-Rerecording: https://app.replay.io/recording/${rerecordedRecordingId}
+Rerecording for ${revision}: https://app.replay.io/recording/${rerecordedRecordingId}
 
 Original screenshot:
 
